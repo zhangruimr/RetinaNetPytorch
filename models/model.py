@@ -3,6 +3,7 @@ import torch.nn as nn
 from  utils.anchor import *
 from subModels import *
 from loss import loss
+from utils.functions import *
 #初始化模型参数
 
 class RetinaNet(nn.Module):
@@ -14,7 +15,7 @@ class RetinaNet(nn.Module):
         self.fpn = FPN([512, 1024, 2048])
         self.cls = Classification(256)
         self.reg = Regression(256)
-        self.baseAnchor = baseAnchor()
+
         self.loss = loss()
     def forward(self, input, labels = None):
         features = self.backbone(input)
@@ -32,13 +33,33 @@ class RetinaNet(nn.Module):
             loss = self.loss(classify, regression, labels, all_anchor)
             return loss
         else:
-            pass
+
+            results = []
+            for i in range(len(regression)):
+                encode_reg_output = decodeBox(all_anchor[i], regression[i])
+                cls_output = classify[i]
+
+                max_val, max_id = t.max(cls_output, 1)
+                mask = max_val > 0.05
+                if not t.sum(mask) > 0:
+                    results.append(None)
+                    continue
+                encode_reg_output = encode_reg_output[mask]
+                cls_output = cls_output[mask]
+
+                results.append(nms(cls_output, encode_reg_output))
+            return results
+
+
+
+
 
 
 if __name__ == "__main__":
     model = RetinaNet()
+    model.train()
     x = t.ones((3, 3, 608, 608))
-    model(x)
+    x = model(x)
 #权重下载后加载
 
 

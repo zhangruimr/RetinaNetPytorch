@@ -10,6 +10,7 @@ from PIL import Image
 from torchvision import transforms
 from torch.nn import functional as F
 from pycocotools.coco import COCO
+
 class COCOTrain(Dataset):
     def __init__(self, path="/home/zr/COCO/", size = 608, flip=True):
         self.path = path

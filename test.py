@@ -2,8 +2,9 @@ import torch as t
 import os
 import numpy as np
 from pycocotools.coco import COCO
-
-
+x = t.Tensor([0, 1,2,3]).byte()
+print(x // 2)
+"""
 def getLabels(COCO, imageId):
     print(imageId)
     annId = COCO.getAnnIds(imageId, iscrowd=False)
@@ -36,4 +37,4 @@ for i in range(len(imageId)):
     label = getLabels(coco, imageId[i])
     np.savetxt(os.path.join("../labels", filename.split(".")[0])+".txt", label)
     wr.close()
-
+"""

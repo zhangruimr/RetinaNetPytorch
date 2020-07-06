@@ -95,8 +95,8 @@ class loss(nn.Module):
             pos_gtw = pos_gt[:, 4] - pos_gt[:, 2]
             pos_gth = pos_gt[:, 5] - pos_gt[:, 3]
 
-            dx =  (pos_gtx - pos_ctrx) / pos_w
-            dy =  (pos_gty - pos_ctry) / pos_h
+            dx = (pos_gtx - pos_ctrx) / pos_w
+            dy = (pos_gty - pos_ctry) / pos_h
             dw = t.log(pos_gtw / pos_w)
             dh = t.log(pos_gth / pos_h)
 

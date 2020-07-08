@@ -4,35 +4,6 @@ import math
 import numpy as np
 import cv2
 
-def transform( image, size):
-    image = t.from_numpy(image / 255).float().permute((2, 0, 1)).contiguous()
-    image = resize(image, size)
-    image = pad(image,  size)
-    return image
-
-
-def resize(image, size):
-    c, h, w = image.shape
-    min_stride = min(size / h, size / w)
-    image = F.interpolate(image.unsqueeze(0), (math.ceil(h * min_stride), math.ceil(w * min_stride))).squeeze(0)
-    return image
-
-
-def pad(self, image, size):
-    _, _h, _w = image.shape
-    if _h == size:
-        dif = (size - _w) // 2
-        pad = (dif, size - _w - dif, 0, 0)
-
-    elif _w == size:
-        dif = (size - _h) // 2
-        pad = (0, 0, dif, size - _h - dif)
-    try:
-        image = F.pad(image.unsqueeze(0), pad=pad).squeeze(0)
-    except:
-        image = None
-    return image
-
 def decodeBox(anchors, cls_output):
     a_x1, a_y1, a_x2, a_y2 = anchors[:, 0], anchors[:, 1], anchors[:, 2], anchors[:, 3]
     a_x, a_y, a_w, a_h = (a_x1 + a_x2) * 0.5, (a_y1 + a_y2) * 0.5, a_x2 - a_x1, a_y2 - a_y1
@@ -72,11 +43,12 @@ def iou(anchors, label):
     a_x1, a_y1, a_x2, a_y2 = anchors[:, 0], anchors[:, 1], anchors[:, 2], anchors[:, 3]
     gt_x1, gt_y1, gt_x2, gt_y2 = label[0], label[1], label[2], label[3]
 
-    insection = (t.min(a_x2, gt_x2) - t.max(a_x1, gt_x1)) * (t.min(a_y2, gt_y2) - t.max(a_y1, gt_y1))
-    insection = t.clamp(insection, min=1e-8)
+    insection = t.clamp(t.min(a_x2, gt_x2) - t.max(a_x1, gt_x1), min=0) * t.clamp(t.min(a_y2, gt_y2) - t.max(a_y1, gt_y1), min=0)
+
     union  = (a_x2 - a_x1) * (a_y2 - a_y1) + (gt_x2 - gt_x1) * (gt_y2 - gt_y1) - insection
 
     iou = insection / union
+
     return iou
 def nms(cls, reg):
 

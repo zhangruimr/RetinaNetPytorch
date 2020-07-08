@@ -11,14 +11,15 @@ def init(model):
 class Resnet(resnet.ResNet):
 
     #默认使用resnet101
-    def __init__(self, block=resnet.Bottleneck, layers=[3, 4, 23, 3], weights="resnet101.pth"):
+    def __init__(self, block=resnet.Bottleneck, layers=[3, 4, 23, 3], weights=None):
         super(Resnet, self).__init__(block, layers)
-        self.load_state_dict(t.load(weights))
+        if not weights == None:
+            self.load_state_dict(t.load(weights))
         print("-----加载預训练成功-----")
         del self.avgpool
         del self.fc
 
-def Backbone(resnettype = 101, weights="resnet101.pth"):
+def Backbone(resnettype = 101, weights=None):
 
     block = resnet.Bottleneck
     layers = [3, 4, 23, 3]

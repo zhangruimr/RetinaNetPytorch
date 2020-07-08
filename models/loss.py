@@ -3,6 +3,7 @@ import numpy as np
 import torch.nn as nn
 from utils.functions import *
 def focalLoss(pos_output, neg_output, pos_label, neg_label, alpha=0.25, gamma=2.0):
+
     pos_num = len(pos_output)
     if pos_num < 1:
         pos_num = 1
@@ -11,8 +12,6 @@ def focalLoss(pos_output, neg_output, pos_label, neg_label, alpha=0.25, gamma=2.
 
     neg_weights = t.pow(neg_output, gamma) * (1 - alpha)
     neg_loss = - t.log(1.0 - neg_output) * neg_weights
-    #print(pos_output.shape)
-    #print(pos_output)
     loss = (pos_loss.sum() + neg_loss.sum()) / pos_num
     return loss
 def smoothLoss(output, label):
@@ -30,19 +29,23 @@ class loss(nn.Module):
     def __init__(self):
         super(loss, self).__init__()
     def forward(self, cls, reg, labels, anchors, alpha=0.25, gamma=2.0):
-        batch = len(cls)
+        batch = cls.shape[0]
         cls_loss = t.zeros((1), requires_grad=True)
         reg_loss = t.zeros((1), requires_grad=True)
+
         if t.cuda.is_available():
             cls_loss = cls_loss.cuda()
             reg_loss = reg_loss.cuda()
         for i in range(batch):
-            cls_output = t.clamp(cls[i], min=1e-4, max=1.0-1e-4)
+            cls_output = t.clamp(cls[i], min=1e-4, max=1.0 - 1e-4)
+
             reg_output = reg[i]
             anchor = anchors[i]
-            label = labels[labels[:, 0]==i]
+            label = labels[labels[:, 0].int()==i]
+
         #have no object
-            if len(label) < 1:
+            if label.shape[0] < 1:
+                print("batch-{}:no object!!".format(i))
                 reg_loss = reg_loss + 0
 
                 weights = t.pow(cls_output, gamma) * (1 - alpha)
@@ -56,11 +59,17 @@ class loss(nn.Module):
             ious = t.stack(ious, 1)
             max_val, max_id = t.max(ious, 1)
             mask_pos = max_val > 0.5
-            mask_neg = max_val < 0.3
-            if t.sum(mask_pos) == 0 or t.sum(mask_neg) == 0:
+            mask_neg = max_val < 0.4
+
+            #print("pos_samplingNum:", t.sum(mask_pos))
+            #print("neg_samplingNum:", t.sum(mask_neg))
+
+            if t.sum(mask_pos) == 0:
+                print("no pos_sampling anchors!!")
                 continue
-            #print("mask_pos",t.sum(mask_pos))
-            #print("mask_neg",t.sum(mask_neg))
+            if t.sum(mask_neg) == 0:
+                print("no neg_sampling anchors!!")
+                continue
             pos_cls = cls_output[mask_pos]
             neg_cls = cls_output[mask_neg]
             pos_labels = t.zeros(pos_cls.shape).float()
@@ -72,18 +81,17 @@ class loss(nn.Module):
             seq = t.arange(0, len(pos_labels)).long()
             if t.cuda.is_available():
                 seq = seq.cuda()
-            #print(label[:, 1][max_id[mask_pos]])
-            #print(label.shape)
+
             cls_index = label[:, 1][max_id[mask_pos]].long()
             pos_labels[seq, cls_index] = 1
-            #print(pos_labels)
+
 
             cls_loss = cls_loss + focalLoss(pos_cls,  neg_cls, pos_labels, neg_labels)
 
 
             pos_anchor = anchor[mask_pos]
-            pos_gt = label[max_id[mask_pos].long()]
-            #print(pos_anchor.shape)
+            pos_gt = label[max_id[mask_pos].long(), :]
+            #print("pos_gt", pos_gt.shape)
 
             pos_ctrx = (pos_anchor[:, 0] + pos_anchor[:, 2]) * 0.5
             pos_ctry = (pos_anchor[:, 1] + pos_anchor[:, 3]) * 0.5
@@ -103,11 +111,9 @@ class loss(nn.Module):
             target = t.stack((dx, dy, dw, dh), 1)
             #print("dx:", target)
             reg_loss = reg_loss + smoothLoss(reg_output[mask_pos], target)
-        #print("sum",reg_loss + cls_loss)
+
         all_loss = (reg_loss + cls_loss) / batch
-        #print("clsloss:", cls_loss)
-        #print("regloss:", reg_loss)
-        #print("loss:", all_loss)
+
         return all_loss
 
 

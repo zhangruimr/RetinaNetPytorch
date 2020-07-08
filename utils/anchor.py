@@ -31,8 +31,8 @@ def layerAnchor(size, stride, baseAnchor):
     grid_y = np.arange(0, h) * stride
 
     grid_x, grid_y = np.meshgrid(grid_x, grid_y)
-    grid_x = grid_x.T + 0.5 * stride
-    grid_y = grid_y.T + 0.5 * stride
+    grid_x = grid_x + 0.5 * stride
+    grid_y = grid_y + 0.5 * stride
     grid = np.tile(np.stack((grid_x, grid_y), -1).reshape((-1, 2)), (1, 2))
 
     grid = np.tile(np.expand_dims(grid, 1), (1, 9, 1))

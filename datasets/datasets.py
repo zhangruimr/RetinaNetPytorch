@@ -6,8 +6,6 @@ import torch as t
 from torch.utils.data import Dataset, DataLoader
 import numpy as np
 import cv2
-from PIL import Image
-from torchvision import transforms
 from torch.nn import functional as F
 from pycocotools.coco import COCO
 
@@ -21,11 +19,11 @@ class COCOTrain(Dataset):
         self.annfile = os.path.join(path, "annotations", "instances_{}.json".format(self.dataType))
         self.COCO = COCO(self.annfile)
         self.imagesId = self.COCO.getImgIds()
-        #print(self.imagesId)
+
         self.classesId = self.COCO.getCatIds()
         self.classesName = [item['name'] for item in self.COCO.loadCats(self.classesId)]
         self.classMap = list(zip(self.classesId, self.classesName))
-        print(self.classMap)
+
     def __getitem__(self, item):
         image , imagePath = self.getImage(item)
         labels = self.getLabels(item)
@@ -70,7 +68,7 @@ class COCOTrain(Dataset):
         x, y, w, h =  labels[:, 1], labels[:, 2], labels[:, 3], labels[:, 4]
         labels[:, 3] = x + w
         labels[:, 4] = y + h
-
+        #pycocotools class index start from 1, so -1
         labels[:, 0] = labels[:, 0] - 1
         return labels
     def transform(self, image, labels, size, flip):

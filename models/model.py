@@ -7,7 +7,7 @@ from utils.functions import *
 #初始化模型参数
 
 class RetinaNet(nn.Module):
-    def __init__(self, backbone = 101, weights="resnet101.pth"):
+    def __init__(self, backbone = 101, weights=None):
         super(RetinaNet, self).__init__()
         self.backbone = Backbone(backbone, weights)
 
@@ -16,8 +16,8 @@ class RetinaNet(nn.Module):
         self.cls = Classification(256)
         self.reg = Regression(256)
 
-        self.loss = loss()
-    def forward(self, input, labels = None):
+
+    def forward(self, input):
         features = self.backbone(input)
         detectFeatures = self.fpn(features)
         all_anchor = generateAnchor(detectFeatures)
@@ -30,8 +30,7 @@ class RetinaNet(nn.Module):
         classify = t.cat(classify, 1)
         regression = t.cat(regression, 1)
         if self.training == True:
-            loss = self.loss(classify, regression, labels, all_anchor)
-            return loss
+            return classify, regression,  all_anchor
         else:
 
             results = []

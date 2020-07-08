@@ -14,7 +14,7 @@ class Resnet(resnet.ResNet):
     def __init__(self, block=resnet.Bottleneck, layers=[3, 4, 23, 3], weights="resnet101.pth"):
         super(Resnet, self).__init__(block, layers)
         self.load_state_dict(t.load(weights))
-        print("-----加载与训练成功-----")
+        print("-----加载預训练成功-----")
         del self.avgpool
         del self.fc
 

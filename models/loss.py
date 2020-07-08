@@ -11,8 +11,8 @@ def focalLoss(pos_output, neg_output, pos_label, neg_label, alpha=0.25, gamma=2.
 
     neg_weights = t.pow(neg_output, gamma) * (1 - alpha)
     neg_loss = - t.log(1.0 - neg_output) * neg_weights
-    print(pos_output.shape)
-    print(pos_output)
+    #print(pos_output.shape)
+    #print(pos_output)
     loss = (pos_loss.sum() + neg_loss.sum()) / pos_num
     return loss
 def smoothLoss(output, label):
@@ -21,8 +21,8 @@ def smoothLoss(output, label):
     pos_num = len(output)
     if pos_num < 1:
         pos_num = 1
-    print(output.shape)
-    print(output)
+    #print(output.shape)
+    #print(output)
     loss = loss.sum() / pos_num
     return loss
 
@@ -59,8 +59,8 @@ class loss(nn.Module):
             mask_neg = max_val < 0.3
             if t.sum(mask_pos) == 0 or t.sum(mask_neg) == 0:
                 continue
-            print("mask_pos",t.sum(mask_pos))
-            print("mask_neg",t.sum(mask_neg))
+            #print("mask_pos",t.sum(mask_pos))
+            #print("mask_neg",t.sum(mask_neg))
             pos_cls = cls_output[mask_pos]
             neg_cls = cls_output[mask_neg]
             pos_labels = t.zeros(pos_cls.shape).float()
@@ -101,11 +101,14 @@ class loss(nn.Module):
             dh = t.log(pos_gth / pos_h)
 
             target = t.stack((dx, dy, dw, dh), 1)
-            print("dx:", target)
+            #print("dx:", target)
             reg_loss = reg_loss + smoothLoss(reg_output[mask_pos], target)
-            print("cls:", cls_loss)
-            print("reg:", reg_loss)
-        return reg_loss + cls_loss
+        #print("sum",reg_loss + cls_loss)
+        all_loss = (reg_loss + cls_loss) / batch
+        #print("clsloss:", cls_loss)
+        #print("regloss:", reg_loss)
+        #print("loss:", all_loss)
+        return all_loss
 
 
 

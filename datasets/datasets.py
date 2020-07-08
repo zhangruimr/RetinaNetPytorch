@@ -102,111 +102,29 @@ class COCOTrain(Dataset):
 
         if _h == size:
             dif = (size - _w) // 2
-            pad = (dif, size- _w - dif, 0, 0)
+            padding = (dif, size- _w - dif, 0, 0)
             labels[:, 1] = labels[:, 1] + dif
             labels[:, 3] = labels[:, 3] + dif
 
         elif _w == size:
             dif = (size - _h) // 2
 
-            pad = (0, 0, dif, size - _h - dif)
+            padding = (0, 0, dif, size - _h - dif)
             labels[:, 2] = labels[:, 2] + dif
             labels[:, 4] = labels[:, 4] + dif
-
-        image = F.pad(image.unsqueeze(0), pad=pad).squeeze(0)
+        try:
+            image = F.pad(image.unsqueeze(0), pad=padding).squeeze(0)
+        except:
+            print("!!!")
+            image = t.zeros((3, size, size)).float()
+            labels = t.zeros((0, 5)).float()
         return image, labels
     def __len__(self):
         return len(self.imagesId)
 
-class COCOServer(Dataset):
-    def __init__(self, path="/home/zr/COCO", size = 608, flip=True):
-        self.path = path
-        self.flip = flip
-        self.size = size
-
-        self.dataType = "train2017"
-        self.labels = "labels"
-
-        self.trainroad = os.path.join(path, self.dataType)
-        self.filenames = os.listdir(self.trainroad)
-        self.trainroad = [os.path.join(self.trainroad, filename) for filename in self.filenames]
-
-
-
-    def __getitem__(self, item):
-        imagePath = self.trainroad[item]
-        image = cv2.imread(imagePath)[:, :, ::-1]
-        labels = np.loadtxt(os.path.join(self.path, self.labels, self.filenames[item].split(".")[0]+ ".txt"))
-        #print(labels.shape)
-        #print(len(labels.shape))
-        if (labels.shape[0] == 0):
-            labels = np.zeros((0, 5))
-        if (len(labels.shape) < 2):
-            labels = np.expand_dims(labels, 0)
-        x, y, w, h = labels[:, 1], labels[:, 2], labels[:, 3], labels[:, 4]
-        labels[:, 3] = x + w
-        labels[:, 4] = y + h
-        image, labels = self.transform(image, labels, self.size, self.flip)
-        return image.float(), labels.float(), imagePath
-
-    def collate_fn(self, batch):
-        images, labels, imagePaths = list(zip(*batch))
-        images = t.stack(images, 0)
-        Labels = []
-        for i, label in enumerate(labels):
-            per = t.zeros((len(label), 6))
-            per[:, 0] = i
-            per[:, 1:] = label
-            Labels.append(per)
-        labels = t.cat(Labels, 0)
-        return images, labels, imagePaths
-    def transform(self, image, labels, size, flip):
-        image = t.from_numpy(image / 255).float().permute((2, 0, 1)).contiguous()
-        labels = t.from_numpy(labels).float()
-
-        image, labels = self.resize(image, labels, size)
-        image, labels = self.pad(image, labels, size)
-
-        if flip:
-            if random.random() < 0.5:
-                image = t.flip(image, [2])
-                cx = (labels[:, 1] + labels[:, 3]) * 0.5
-                w = labels[:, 3] - labels[:, 1]
-                #print(cx)
-                cx = size - cx
-                labels[:, 1] = cx - 0.5 * w
-                labels[:, 3] = cx + 0.5 * w
-                #print(labels)
-        return image, labels
-    def resize(self, image, labels, size):
-        c, h, w = image.shape
-        min_stride = min(size / h, size / w)
-        image = F.interpolate(image.unsqueeze(0), (math.ceil(h * min_stride), math.ceil(w * min_stride))).squeeze(0)
-        labels[:, 1:] = labels[:, 1:] * min_stride
-        return image, labels
-    def pad(self, image, labels, size):
-        _, _h, _w = image.shape
-
-        if _h == size:
-            dif = (size - _w) // 2
-            pad = (dif, size- _w - dif, 0, 0)
-            labels[:, 1] = labels[:, 1] + dif
-            labels[:, 3] = labels[:, 3] + dif
-
-        elif _w == size:
-            dif = (size - _h) // 2
-
-            pad = (0, 0, dif, size - _h - dif)
-            labels[:, 2] = labels[:, 2] + dif
-            labels[:, 4] = labels[:, 4] + dif
-
-        image = F.pad(image.unsqueeze(0), pad=pad).squeeze(0)
-        return image, labels
-    def __len__(self):
-        return len(self.filenames)
 
 if __name__ == "__main__":
-    a = COCOServer()
+    a = COCOTrain()
     dataloader = DataLoader(dataset=a, batch_size = 1, shuffle=True, collate_fn=a.collate_fn, drop_last=True)
     for data, labels, paths in dataloader:
         image = data.permute((0, 2, 3, 1)).contiguous().numpy()[0]

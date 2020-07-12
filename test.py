@@ -2,8 +2,9 @@ import torch as t
 import os
 import numpy as np
 from pycocotools.coco import COCO
-x = t.Tensor([0, 1,2,3]).byte()
-print(x // 2)
+x = t.Tensor([[0, 1] , [2,3]])
+x = t.where(x > 1, t.ones(x.shape), x)
+print(x)
 """
 def getLabels(COCO, imageId):
     print(imageId)

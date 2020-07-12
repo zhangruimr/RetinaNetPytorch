@@ -5,13 +5,15 @@ from utils.functions import *
 def focalLoss(pos_output, neg_output, pos_label, neg_label, alpha=0.25, gamma=2.0):
 
     pos_num = len(pos_output)
+    output = t.cat((pos_output, neg_output), 0)
+    target = t.cat((pos_label, neg_label), 0)
     if pos_num < 1:
         pos_num = 1
-    pos_weights = t.pow(1-pos_output, gamma) * alpha
-    pos_loss = - t.log(pos_output) * pos_weights
+    pos_weights = t.pow(1-output, gamma) * alpha * target
+    pos_loss = - t.log(output) * pos_weights
 
-    neg_weights = t.pow(neg_output, gamma) * (1 - alpha)
-    neg_loss = - t.log(1.0 - neg_output) * neg_weights
+    neg_weights = t.pow(output, gamma) * (1 - alpha) * (1 - target)
+    neg_loss = - t.log(1.0 - output) * neg_weights
     loss = (pos_loss.sum() + neg_loss.sum()) / pos_num
     return loss
 def smoothLoss(output, label):
@@ -34,15 +36,15 @@ class loss(nn.Module):
         reg_loss = t.zeros((1), requires_grad=True)
 
         if t.cuda.is_available():
-            cls_loss = cls_loss.cuda()
-            reg_loss = reg_loss.cuda()
+            cls_loss = cls_loss.cuda(2)
+            reg_loss = reg_loss.cuda(2)
         for i in range(batch):
             cls_output = t.clamp(cls[i], min=1e-4, max=1.0 - 1e-4)
 
             reg_output = reg[i]
             anchor = anchors[i]
             label = labels[labels[:, 0].int()==i]
-
+            #print("label", label)
         #have no object
             if label.shape[0] < 1:
                 print("batch-{}:no object!!".format(i))
@@ -75,17 +77,19 @@ class loss(nn.Module):
             pos_labels = t.zeros(pos_cls.shape).float()
             neg_labels = t.zeros(neg_cls.shape).float()
             if t.cuda.is_available():
-                pos_labels = pos_labels.cuda()
-                neg_labels = neg_labels.cuda()
+                pos_labels = pos_labels.cuda(2)
+                neg_labels = neg_labels.cuda(2)
 
             seq = t.arange(0, len(pos_labels)).long()
             if t.cuda.is_available():
-                seq = seq.cuda()
-
-            cls_index = label[:, 1][max_id[mask_pos]].long()
+                seq = seq.cuda(2)
+            #print(max_id)
+            cls_index = label[:, 1][max_id[mask_pos].long()].long()
+            #print("a", label[:, 1], max_id[mask_pos])
+            #print("b", cls_index)
             pos_labels[seq, cls_index] = 1
 
-
+            #print("pos_cls", pos_cls)
             cls_loss = cls_loss + focalLoss(pos_cls,  neg_cls, pos_labels, neg_labels)
 
 

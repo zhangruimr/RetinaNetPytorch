@@ -36,10 +36,10 @@ def layerAnchor(size, stride, baseAnchor):
     grid = np.tile(np.stack((grid_x, grid_y), -1).reshape((-1, 2)), (1, 2))
 
     grid = np.tile(np.expand_dims(grid, 1), (1, 9, 1))
-    #print(grid)
+
     anchorAnchor = np.tile(np.expand_dims(anchorAnchor, 0), (grid.shape[0], 1, 1))
     layer_anchor = grid + anchorAnchor
-    #print(layer_anchor)
+
     layer_anchor = np.reshape(layer_anchor, (-1, 4))
     layer_anchor = np.tile(layer_anchor, (b, 1, 1))
     return layer_anchor

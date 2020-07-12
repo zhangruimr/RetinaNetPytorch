@@ -49,6 +49,8 @@ def train_process(img, label, size, flip=True):
     labels = t.from_numpy(labels).float()
     return img, labels
 def test_process(img, size):
+
+    img = t.from_numpy(img/255).permute((2, 0, 1)).contiguous().float()
     w, h = size
     _c, _h, _w,= img.shape
     scale = min(h / _h, w / _w)
@@ -60,9 +62,10 @@ def test_process(img, size):
         padding = (h - math.ceil(scale * _h)) // 2
         pad = (0, 0, padding, h - math.ceil(scale * _h) - padding)
 
-    img = F.pad(img.unsqueeze(0), pad).squeeze(0)
+    img = F.pad(img.unsqueeze(0), pad)
 
     return img
+
 class TrainDataset(Dataset):
     def __init__(self, img_road, size):
         with open(img_road, 'r') as tp:
@@ -102,6 +105,7 @@ class TrainDataset(Dataset):
     def __len__(self):
         return len(self.imgs_road)
 
+"""
 class TestDataset(Dataset):
     def __init__(self, img_road, size):
         with open(img_road, 'r') as tp:
@@ -124,7 +128,7 @@ class TestDataset(Dataset):
         return imgs,  roads
     def __len__(self):
         return len(self.imgs_road)
-
+"""
 if __name__ == "__main__":
      dataset  = TrainDataset("train.txt", (608, 608))
      dataloader = DataLoader(dataset, batch_size=1, collate_fn=dataset.collate_fn)

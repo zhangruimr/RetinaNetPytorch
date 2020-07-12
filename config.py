@@ -1,15 +1,21 @@
 import random
 class Config():
-    detectWeights = "weights/Finally.pth"
-    detetcDirs = "/home/zr/gitCode/data/samples/"
-    detectResults = "/home/zr/gitCode/data/results/"
-    classnum = 90
+    detectWeights = "weights/epoch49.pth"
+    detetcDirs = "/home/zr/GithubCode/data/samples/"
+    detectResults = "/home/zr/GithubCode/data/results/"
+
+    classnum = 20
+    colors = [(random.randint(80, 200), random.randint(80, 200), random.randint(80, 200)) for i in range(classnum)]
     size = 608
-    colors = [(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)) for i in range(classnum)]
+    classname = ['airplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus', 'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike', 'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+    start_lr = 0.0001
+    lr_change = [40, 80]
+    lr_decay = 0.1
     preTrain = "models/resnet101.pth"
-    trainWeights = None
+    trainWeights = "weights/epoch49.pth"
+    #trainWeights = None
     if not trainWeights == None:
         preTrain = None
-    batch = 8
-    epoches = 100
-    weights = "weights/"
+    batch = 12
+    epoches = 160
+    weightsSave = "weights/"

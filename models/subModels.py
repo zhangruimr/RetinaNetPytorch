@@ -15,7 +15,7 @@ class Resnet(resnet.ResNet):
         super(Resnet, self).__init__(block, layers)
         if not weights == None:
             self.load_state_dict(t.load(weights))
-        print("-----加载預训练成功-----")
+            print("-----加载預训练成功-----")
         del self.avgpool
         del self.fc
 

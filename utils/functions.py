@@ -17,9 +17,9 @@ def decodeBox(anchors, cls_output):
     a_x1, a_y1, a_x2, a_y2 = anchors[:, 0], anchors[:, 1], anchors[:, 2], anchors[:, 3]
     a_x, a_y, a_w, a_h = (a_x1 + a_x2) * 0.5, (a_y1 + a_y2) * 0.5, a_x2 - a_x1, a_y2 - a_y1
 
-    #gt_x1, gt_y1, gt_x2, gt_y2 = cls_output[:, 0], cls_output[:, 1], cls_output[:, 2], cls_output[:, 3]
+
     gt_x, gt_y, gt_w, gt_h = cls_output[:, 0], cls_output[:, 1], cls_output[:, 2], cls_output[:, 3]
-    #gt_x, gt_y, gt_w, gt_h = (gt_x1 + gt_x2) * 0.5, (gt_y1 +  gt_y2) * 0.5, gt_x2 - gt_x1, gt_y2 - gt_y1
+
 
     x = gt_x * a_w + a_x
     y = gt_y * a_h + a_y
@@ -35,18 +35,17 @@ def cal_box(detection, image_shape, size=608):
     h, w, c = image_shape
     min_stride = min(size / h, size / w)
     _h, _w = math.ceil(h * min_stride), math.ceil(w * min_stride)
-    #print(h, w)
-    #print(_h, _w)
+
     if _h == size:
         dif = (size - _w) // 2
-        #print("dif",dif)
+
         detection[:, 0] = detection[:, 0] - dif
         detection[:, 2] = detection[:, 2] - dif
         detection[:, 0:4] = detection[:, 0:4] / min_stride
 
     elif _w == size:
         dif = (size - _h) // 2
-        #print("dif", dif)
+
         detection[:, 1] = detection[:, 1] - dif
         detection[:, 3] = detection[:, 3] - dif
         detection[:, 0:4] = detection[:, 0:4] / min_stride
@@ -83,7 +82,7 @@ def nms(cls, reg):
         box = res[0]
         objects.append(box)
         ious = iou(res[:, 0:4], box[0:4])
-        #print("ious:", ious)
+
         iou_mask = ious > 0.5
         cls_mask = res[:, -1] == box[-1]
 
@@ -93,7 +92,7 @@ def nms(cls, reg):
         res = res[mask]
 
     objects = t.stack(objects, 0)
-    #print(objects)
+
     return objects
 
 

@@ -83,11 +83,11 @@ class COCOTrain(Dataset):
                 image = t.flip(image, [2])
                 cx = (labels[:, 1] + labels[:, 3]) * 0.5
                 w = labels[:, 3] - labels[:, 1]
-                #print(cx)
+
                 cx = size - cx
                 labels[:, 1] = cx - 0.5 * w
                 labels[:, 3] = cx + 0.5 * w
-                #print(labels)
+
         return image, labels
     def resize(self, image, labels, size):
         c, h, w = image.shape
@@ -135,4 +135,3 @@ if __name__ == "__main__":
         cv2.imshow("win", image)
         cv2.waitKey(0)
 
-        #print(data.shape)

@@ -21,7 +21,7 @@ class RetinaNet(nn.Module):
         features = self.backbone(input)
         detectFeatures = self.fpn(features)
         all_anchor = generateAnchor(detectFeatures)
-        #print(all_anchor.shape)
+
         classify = []
         regression = []
         for detectFeature in detectFeatures:

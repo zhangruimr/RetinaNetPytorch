@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-#本脚本直接copy的torch源码,不用的层级直接删掉，这里删掉acgpool和fc
+#本脚本直接copy的torch源码
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
     """3x3 convolution with padding"""

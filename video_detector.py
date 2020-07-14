@@ -22,11 +22,11 @@ if __name__ == "__main__":
     os.makedirs(detectResults, exist_ok=True)
     model = RetinaNet(weights=preTrain, classNum=classNum)
     if t.cuda.is_available():
-        model = t.nn.DataParallel(model, device_ids=[0])
+        model = t.nn.DataParallel(model, device_ids=[0, 1])
         model = model.cuda()
     model.load_state_dict(t.load(weights))
     model.eval()
-    #video = cv2.VideoCapture("/home/zr/gitCode/data/results/cat.mp4")
+
     video = cv2.VideoCapture("cat.mp4")
     fourcc = cv2.VideoWriter_fourcc(*'XVID')
     videowriter = cv2.VideoWriter(detectResults+"cat.avi", fourcc, 20.0, (int(video.get(4)), int(video.get(3))), True)
@@ -36,8 +36,7 @@ if __name__ == "__main__":
             ret, frame = video.read()
             if not ret:
                 break
-            if freq % 4 == 0:
-                img = detect(model, frame, classname, colors, size)
+            img = detect(model, frame, classname, colors, size)
             videowriter.write(frame)
             cv2.imshow("win", frame)
 

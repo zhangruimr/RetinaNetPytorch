@@ -25,7 +25,7 @@ def layerAnchor(size, stride, baseAnchor):
     b, c, h, w = size
 
     anchorAnchor = baseAnchor
-    #print(anchorAnchor)
+
 
     grid_x = np.arange(0, w) * stride
     grid_y = np.arange(0, h) * stride
@@ -63,17 +63,14 @@ if __name__ == "__main__":
     pic = cv2.resize(pic, (608, 608))
     anchor = baseAnchor(2**7)
     anchor = layerAnchor((1, 3, 38, 38), 16, anchor)[0]
-    #print(len(anchor))
-    #cv2.imshow("win", pic)
+
     i = 0
     for box in anchor:
-     #if i % 5 == 0:
-      #print(box)
+
       x1, y1, x2, y2 = box.tolist()
-      #print((int(x1) * 32, int(y1) * 32), (int(x2) * 32, int(y2) * 32))
+
       cv2.rectangle(pic, (int(x1) , int(y1)), (int(x2), int(y2)), (255, 0, 0), 1)
       cv2.circle(pic, (int( (int(x1)+int(x2))*0.5 ), int( (int(y1)+int(y2))*0.5 )), 2, (255, 0, 0), -1)
-      #print((int( (int(x1)*32+int(x1)*32)*0.5 ), int( (int(y1)*32+int(y2)*32)*0.5 )))
       cv2.imshow("win", pic)
       cv2.waitKey(0)
       i += 1

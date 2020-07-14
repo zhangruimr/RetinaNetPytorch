@@ -105,30 +105,6 @@ class TrainDataset(Dataset):
     def __len__(self):
         return len(self.imgs_road)
 
-"""
-class TestDataset(Dataset):
-    def __init__(self, img_road, size):
-        with open(img_road, 'r') as tp:
-            self.imgs_road = tp.read()
-            self.imgs_road = [i for i in self.imgs_road.split("\n") if i != '']
-        self.size = size
-    def __getitem__(self, index):
-        img = Image.open(self.imgs_road[index])
-        img = T.ToTensor()(img)
-
-        if len(img.shape) < 3:
-            print("image error, road in {}".format(self.imgs_road[index]))
-        img = test_process(img, self.size)
-        return img, self.imgs_road[index]
-
-    def collate_fn(self, batch):
-
-        imgs, roads = list(zip(*batch))
-        imgs = t.stack(imgs, 0)
-        return imgs,  roads
-    def __len__(self):
-        return len(self.imgs_road)
-"""
 if __name__ == "__main__":
      dataset  = TrainDataset("train.txt", (608, 608))
      dataloader = DataLoader(dataset, batch_size=1, collate_fn=dataset.collate_fn)

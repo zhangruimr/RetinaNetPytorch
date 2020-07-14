@@ -33,7 +33,7 @@ def train():
     if t.cuda.is_available():
         print("----GPU-Training----")
         model = model.cuda(2)
-        model = t.nn.DataParallel(model, device_ids=[2, 3])
+        model = t.nn.DataParallel(model, device_ids=[0])
 
     if not trainweights == None:
         print("trainWeights:", trainweights)

@@ -71,13 +71,13 @@ class FPN(nn.Module):
         p3_x = self.p3_2(p3_x)
 
         p6_x = self.p6(c5)
-        #print(p6_x.shape)
+
 
         p7_x = self.p7_relu(p6_x)
         p7_x = self.p7_conv(p7_x)
-       # print(p7_x.shape)
+
         output = [p3_x, p4_x, p5_x, p6_x, p7_x]
-        #output = [p3_x, p4_x, p5_x]
+
         return output
 
 class Classification(nn.Module):

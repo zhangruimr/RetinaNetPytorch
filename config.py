@@ -13,7 +13,6 @@ class Config():
     lr_decay = 0.1
     preTrain = "models/resnet101.pth"
     trainWeights = "weights/epoch49.pth"
-    #trainWeights = None
     if not trainWeights == None:
         preTrain = None
     batch = 12

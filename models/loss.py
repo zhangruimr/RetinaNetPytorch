@@ -22,8 +22,7 @@ def smoothLoss(output, label):
     pos_num = len(output)
     if pos_num < 1:
         pos_num = 1
-    #print(output.shape)
-    #print(output)
+
     loss = loss.sum() / pos_num
     return loss
 
@@ -44,7 +43,7 @@ class loss(nn.Module):
             reg_output = reg[i]
             anchor = anchors[i]
             label = labels[labels[:, 0].int()==i]
-            #print("label", label)
+
         #have no object
             if label.shape[0] < 1:
                 print("batch-{}:no object!!".format(i))
@@ -63,8 +62,6 @@ class loss(nn.Module):
             mask_pos = max_val > 0.5
             mask_neg = max_val < 0.4
 
-            #print("pos_samplingNum:", t.sum(mask_pos))
-            #print("neg_samplingNum:", t.sum(mask_neg))
 
             if t.sum(mask_pos) == 0:
                 print("no pos_sampling anchors!!")
@@ -83,19 +80,17 @@ class loss(nn.Module):
             seq = t.arange(0, len(pos_labels)).long()
             if t.cuda.is_available():
                 seq = seq.cuda(2)
-            #print(max_id)
+
             cls_index = label[:, 1][max_id[mask_pos].long()].long()
-            #print("a", label[:, 1], max_id[mask_pos])
-            #print("b", cls_index)
+
             pos_labels[seq, cls_index] = 1
 
-            #print("pos_cls", pos_cls)
+
             cls_loss = cls_loss + focalLoss(pos_cls,  neg_cls, pos_labels, neg_labels)
 
 
             pos_anchor = anchor[mask_pos]
             pos_gt = label[max_id[mask_pos].long(), :]
-            #print("pos_gt", pos_gt.shape)
 
             pos_ctrx = (pos_anchor[:, 0] + pos_anchor[:, 2]) * 0.5
             pos_ctry = (pos_anchor[:, 1] + pos_anchor[:, 3]) * 0.5
@@ -113,7 +108,7 @@ class loss(nn.Module):
             dh = t.log(pos_gth / pos_h)
 
             target = t.stack((dx, dy, dw, dh), 1)
-            #print("dx:", target)
+
             reg_loss = reg_loss + smoothLoss(reg_output[mask_pos], target)
 
         all_loss = (reg_loss + cls_loss) / batch

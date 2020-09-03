@@ -32,8 +32,7 @@ def train():
     #    print(name, param)
     if t.cuda.is_available():
         print("----GPU-Training----")
-        model = model.cuda(2)
-        model = t.nn.DataParallel(model, device_ids=[0])
+        model = model.cuda()
 
     if not trainweights == None:
         print("trainWeights:", trainweights)
@@ -53,8 +52,8 @@ def train():
 
             print("--epoch-{}-batch-{}--".format(epoch, i))
             if t.cuda.is_available():
-                imgs = imgs.cuda(2)
-                labels = labels.cuda(2)
+                imgs = imgs.cuda()
+                labels = labels.cuda()
             classify, regression,  all_anchor = model(imgs)
             all_loss = Loss(classify, regression, labels, all_anchor)
             print("Loss:", all_loss)

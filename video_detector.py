@@ -22,7 +22,6 @@ if __name__ == "__main__":
     os.makedirs(detectResults, exist_ok=True)
     model = RetinaNet(weights=preTrain, classNum=classNum)
     if t.cuda.is_available():
-        model = t.nn.DataParallel(model, device_ids=[0, 1])
         model = model.cuda()
     model.load_state_dict(t.load(weights))
     model.eval()

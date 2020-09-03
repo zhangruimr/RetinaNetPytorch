@@ -8,8 +8,8 @@ def clip_box(reg_output, size):
     bottom = t.zeros(reg_output.shape)
     top = t.ones(reg_output.shape) * size
     if t.cuda.is_available():
-        bottom = bottom.cuda(2)
-        top = top.cuda(2)
+        bottom = bottom.cuda()
+        top = top.cuda()
     reg_output = t.where(reg_output < 0, bottom, reg_output)
     reg_output = t.where(reg_output > size, top, reg_output)
     return  reg_output
